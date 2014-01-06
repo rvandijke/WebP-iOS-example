@@ -1,0 +1,4 @@
+39c39
+< #if defined(__ARM_NEON__) || defined(WEBP_ANDROID_NEON)
+---
+> #if defined(_ARM_ARCH_7) || defined(WEBP_ANDROID_NEON)

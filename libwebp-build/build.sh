@@ -9,7 +9,7 @@
 #
 
 SDK=7.0
-PLATFORMS="iPhoneSimulator iPhoneOS-V7 iPhoneOS-V7s"
+PLATFORMS="iPhoneSimulator iPhoneOS-V7 iPhoneOS-V7s iPhoneOS-V64"
 DEVELOPER=`xcode-select -print-path`
 TOPDIR=`pwd`
 BUILDDIR="$TOPDIR/tmp"
@@ -31,6 +31,10 @@ do
   then
     SDKPATH="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/"
     ARCH="armv7s"
+  elif [ "${PLATFORM}" == "iPhoneOS-V64" ]
+  then
+    SDKPATH="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/"
+    ARCH="arm64"
   else
     SDKPATH="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk/"
     ARCH="i386"
@@ -46,9 +50,13 @@ do
   export CXXCPP=${DEVROOT}/usr/bin/cpp
   export RANLIB=${DEVROOT}/usr/bin/ranlib
 
-  rm -rf libwebp-0.3.1
-  tar xzf libwebp-0.3.1.tar.gz
-  cd libwebp-0.3.1
+  rm -rf libwebp-0.4.0
+  tar xzf libwebp-0.4.0.tar.gz
+
+  # disable neon for 64 bit environment
+  patch libwebp-0.4.0/src/dsp/dsp.h disable_64bit_neon
+
+  cd libwebp-0.4.0
 
   sh autogen.sh
 
@@ -56,11 +64,16 @@ do
   rm -rf "${ROOTDIR}"
   mkdir -p "${ROOTDIR}"
 
-  export LDFLAGS="-arch ${ARCH} -miphoneos-version-min=5.0 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
-  export CFLAGS="-arch ${ARCH} -miphoneos-version-min=5.0 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
-  export CXXFLAGS="-arch ${ARCH} -miphoneos-version-min=5.0 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
+  export LDFLAGS="-arch ${ARCH} -miphoneos-version-min=6.1 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
+  export CFLAGS="-arch ${ARCH} -miphoneos-version-min=6.1 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
+  export CXXFLAGS="-arch ${ARCH} -miphoneos-version-min=6.1 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
 
-  ./configure --host=${ARCH}-apple-darwin --prefix=${ROOTDIR} --disable-shared --enable-static
+  if [ "${PLATFORM}" == "iPhoneOS-v64" ]
+  then
+    ./configure --host=${ARCH}-apple-darwin --prefix=${ROOTDIR} --disable-shared --enable-static
+  else
+    ./configure --host=aarch64-apple-darwin --prefix=${ROOTDIR} --disable-shared --enable-static
+  fi
   make
   make install
 
