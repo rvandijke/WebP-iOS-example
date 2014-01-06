@@ -5,7 +5,7 @@ A simple example of using [libwebp](https://developers.google.com/speed/webp/) i
 
 ## REQUIREMENTS
 
-Before you can compile the example application you will need to build the WebP framework for iOS. To do that run the build.sh file in the libwebp-build directory after downloading the latest libwebp source archive. You can download the latest archive from the [libwebp downloads](https://developers.google.com/speed/webp/download)
+Just execute build.sh in the libwebp-build folder. It will download the libwebp source code using wget, patches it to disable 64-bit NEON support and compiles it into a universal framework.
 
 The framework build will produce a single framework that will work for the simulator, iPhone and iPad devices. To use it just add it to your project.
 

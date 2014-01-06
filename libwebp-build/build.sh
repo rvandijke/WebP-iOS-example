@@ -17,6 +17,9 @@ FINALDIR="$TOPDIR/WebP.framework"
 LIBLIST=''
 DEVROOT="${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain"
 
+rm libwebp-0.4.0.tar.gz
+wget https://webp.googlecode.com/files/libwebp-0.4.0.tar.gz
+
 mkdir -p $BUILDDIR
 mkdir -p $FINALDIR
 mkdir $FINALDIR/Headers/
@@ -53,8 +56,11 @@ do
   rm -rf libwebp-0.4.0
   tar xzf libwebp-0.4.0.tar.gz
 
-  # disable neon for 64 bit environment
-  patch libwebp-0.4.0/src/dsp/dsp.h disable_64bit_neon
+  if [ "${PLATFORM}" == "iPhoneOS-V64" ]
+  then
+    # disable neon for 64 bit environment
+    patch libwebp-0.4.0/src/dsp/dsp.h disable_64bit_neon
+  fi
 
   cd libwebp-0.4.0
 
