@@ -9,7 +9,7 @@
 #
 
 SDK=7.0
-PLATFORMS="iPhoneSimulator iPhoneOS-V7 iPhoneOS-V7s iPhoneOS-V64"
+PLATFORMS="iPhoneSimulator iPhoneSimulator64 iPhoneOS-V7 iPhoneOS-V7s iPhoneOS-V64"
 DEVELOPER=`xcode-select -print-path`
 TOPDIR=`pwd`
 BUILDDIR="$TOPDIR/tmp"
@@ -38,9 +38,14 @@ do
   then
     SDKPATH="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/"
     ARCH="arm64"
-  else
+  elif [ "${PLATFORM}" == "iPhoneSimulator" ]
+  then
     SDKPATH="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk/"
     ARCH="i386"
+  elif [ "${PLATFORM}" == "iPhoneSimulator64" ]
+  then
+    SDKPATH="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk/"
+    ARCH="x86_64"
   fi
 
   export CC=${DEVROOT}/usr/bin/cc
@@ -56,7 +61,7 @@ do
   rm -rf libwebp-0.4.0
   tar xzf libwebp-0.4.0.tar.gz
 
-  if [ "${PLATFORM}" == "iPhoneOS-V64" ]
+  if [ "${PLATFORM}" == "iPhoneOS-V64" ] || [ "{$PLATFORM}" == "iPhoneSimulator64" ]
   then
     # disable neon for 64 bit environment
     patch libwebp-0.4.0/src/dsp/dsp.h disable_64bit_neon
@@ -74,7 +79,7 @@ do
   export CFLAGS="-arch ${ARCH} -miphoneos-version-min=6.1 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
   export CXXFLAGS="-arch ${ARCH} -miphoneos-version-min=6.1 -pipe -no-cpp-precomp -isysroot ${SDKPATH}"
 
-  if [ "${PLATFORM}" == "iPhoneOS-v64" ]
+  if ! [ "${ARCH}" == "arm64" ]
   then
     ./configure --host=${ARCH}-apple-darwin --prefix=${ROOTDIR} --disable-shared --enable-static
   else
@@ -91,5 +96,5 @@ done
 
 ${DEVROOT}/usr/bin/lipo -create $LIBLIST -output $FINALDIR/WebP
 
-rm -rf libwebp-0.3.1
+rm -rf libwebp-0.4.0
 rm -rf ${BUILDDIR}
